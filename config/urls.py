@@ -11,7 +11,7 @@ router.register(r'photos', PhotoViewSet, basename='photo')
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', index, name='index'),
+    path('inde', index, name='index'),
     path('api/', include(router.urls)),
     path('upload/', upload_photo, name='upload_photo'),
 ]
