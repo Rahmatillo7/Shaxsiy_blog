@@ -1,0 +1,2752 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Django Rasm Galereyasi</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0a0a0f;
+            min-height: 100vh;
+            color: #e4e4e7;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        /* Header */
+        header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #00d4aa;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        header h1 svg {
+            width: 40px;
+            height: 40px;
+            stroke: #00d4aa;
+        }
+
+        header p {
+            color: #71717a;
+            font-size: 1rem;
+        }
+
+        /* Upload Section */
+        .upload-section {
+            background: #111118;
+            border: 1px solid #27272a;
+            border-radius: 16px;
+            padding: 32px;
+            margin-bottom: 40px;
+        }
+
+        .upload-form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 640px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .form-group label {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #a1a1aa;
+        }
+
+        .form-group input[type="text"],
+        .form-group textarea {
+            background: #18181b;
+            border: 1px solid #27272a;
+            border-radius: 10px;
+            padding: 14px 16px;
+            font-size: 1rem;
+            color: #e4e4e7;
+            transition: all 0.2s ease;
+            outline: none;
+        }
+
+        .form-group input[type="text"]:focus,
+        .form-group textarea:focus {
+            border-color: #00d4aa;
+            box-shadow: 0 0 0 3px rgba(0, 212, 170, 0.1);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .form-group input::placeholder,
+        .form-group textarea::placeholder {
+            color: #52525b;
+        }
+
+        /* File Input */
+        .file-input-wrapper {
+            position: relative;
+        }
+
+        .file-input-wrapper input[type="file"] {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+            z-index: 2;
+        }
+
+        .file-input-label {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            padding: 40px 20px;
+            background: #18181b;
+            border: 2px dashed #3f3f46;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: #71717a;
+            font-weight: 500;
+        }
+
+        .file-input-label svg {
+            width: 32px;
+            height: 32px;
+            stroke: #71717a;
+        }
+
+        .file-input-wrapper:hover .file-input-label {
+            background: #1f1f24;
+            border-color: #00d4aa;
+            color: #00d4aa;
+        }
+
+        .file-input-wrapper:hover .file-input-label svg {
+            stroke: #00d4aa;
+        }
+
+        .selected-file {
+            margin-top: 12px;
+            padding: 12px 16px;
+            background: rgba(0, 212, 170, 0.1);
+            border: 1px solid rgba(0, 212, 170, 0.2);
+            border-radius: 8px;
+            color: #00d4aa;
+            font-size: 0.875rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 14px 24px;
+            font-size: 0.9375rem;
+            font-weight: 600;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: none;
+            outline: none;
+        }
+
+        .btn svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        .btn-primary {
+            background: #00d4aa;
+            color: #0a0a0f;
+        }
+
+        .btn-primary:hover {
+            background: #00e6b8;
+            transform: translateY(-1px);
+        }
+
+        .btn-danger {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        .btn-danger:hover {
+            background: rgba(239, 68, 68, 0.2);
+        }
+
+        .btn-secondary {
+            background: #27272a;
+            color: #a1a1aa;
+        }
+
+        .btn-secondary:hover {
+            background: #3f3f46;
+            color: #e4e4e7;
+        }
+
+        /* Stats */
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding: 16px 24px;
+            background: #111118;
+            border-radius: 12px;
+            border: 1px solid #27272a;
+        }
+
+        #statsText {
+            font-weight: 500;
+            color: #a1a1aa;
+        }
+
+        /* Gallery */
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 24px;
+        }
+
+        .gallery-item {
+            background: #111118;
+            border: 1px solid #27272a;
+            border-radius: 14px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .gallery-item:hover {
+            transform: translateY(-4px);
+            border-color: #3f3f46;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        .gallery-item .image-wrapper {
+            position: relative;
+            aspect-ratio: 4/3;
+            overflow: hidden;
+        }
+
+        .gallery-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
+        .gallery-item:hover img {
+            transform: scale(1.05);
+        }
+
+        .image-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to top, rgba(0, 0, 0, 0.8) 0%, transparent 60%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            padding-bottom: 16px;
+            gap: 10px;
+        }
+
+        .gallery-item:hover .image-overlay {
+            opacity: 1;
+        }
+
+        .overlay-btn {
+            width: 42px;
+            height: 42px;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            backdrop-filter: blur(8px);
+        }
+
+        .overlay-btn svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        .overlay-btn.view {
+            background: rgba(255, 255, 255, 0.15);
+            color: white;
+        }
+
+        .overlay-btn.view:hover {
+            background: #00d4aa;
+            color: #0a0a0f;
+        }
+
+        .overlay-btn.edit {
+            background: rgba(59, 130, 246, 0.2);
+            color: #3b82f6;
+        }
+
+        .overlay-btn.edit:hover {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .overlay-btn.download {
+            background: rgba(34, 197, 94, 0.2);
+            color: #22c55e;
+        }
+
+        .overlay-btn.download:hover {
+            background: #22c55e;
+            color: white;
+        }
+
+        .overlay-btn.delete {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+        }
+
+        .overlay-btn.delete:hover {
+            background: #ef4444;
+            color: white;
+        }
+
+        .gallery-item .info {
+            padding: 16px 20px;
+        }
+
+        .gallery-item .info h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #e4e4e7;
+            margin-bottom: 6px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .gallery-item .info p {
+            font-size: 0.875rem;
+            color: #71717a;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 80px 20px;
+        }
+
+        .empty-state svg {
+            width: 80px;
+            height: 80px;
+            stroke: #3f3f46;
+            margin-bottom: 24px;
+        }
+
+        .empty-state h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #a1a1aa;
+            margin-bottom: 12px;
+        }
+
+        .empty-state p {
+            color: #71717a;
+        }
+
+        /* Base Modal Styles */
+        .modal-backdrop {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .modal-backdrop.active {
+            display: flex;
+        }
+
+        /* Image View Modal */
+        .view-modal-content {
+            position: relative;
+            max-width: 90vw;
+            max-height: 90vh;
+        }
+
+        .view-modal-content img {
+            max-width: 100%;
+            max-height: 85vh;
+            border-radius: 12px;
+            object-fit: contain;
+            animation: modalIn 0.3s ease;
+        }
+
+        @keyframes modalIn {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .modal-close {
+            position: absolute;
+            top: -48px;
+            right: 0;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            background: #27272a;
+            color: #a1a1aa;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .modal-close:hover {
+            background: #ef4444;
+            color: white;
+        }
+
+        .modal-close svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        /* Edit/Delete Dialog Modal */
+        .dialog-modal {
+            background: #111118;
+            border: 1px solid #27272a;
+            border-radius: 16px;
+            width: 100%;
+            max-width: 440px;
+            animation: modalIn 0.3s ease;
+            overflow: hidden;
+        }
+
+        .dialog-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px 24px;
+            border-bottom: 1px solid #27272a;
+        }
+
+        .dialog-header h2 {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #e4e4e7;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .dialog-header h2 svg {
+            width: 22px;
+            height: 22px;
+        }
+
+        .dialog-header h2.edit-title svg {
+            stroke: #3b82f6;
+        }
+
+        .dialog-header h2.delete-title svg {
+            stroke: #ef4444;
+        }
+
+        .dialog-close {
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            background: transparent;
+            color: #71717a;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .dialog-close:hover {
+            background: #27272a;
+            color: #e4e4e7;
+        }
+
+        .dialog-close svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        .dialog-body {
+            padding: 24px;
+        }
+
+        .dialog-footer {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            padding: 20px 24px;
+            border-top: 1px solid #27272a;
+            background: #0d0d12;
+        }
+
+        /* Edit Form */
+        .edit-preview {
+            width: 100%;
+            height: 160px;
+            object-fit: cover;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            background: #18181b;
+        }
+
+        .edit-form {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .edit-form .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .edit-form .form-group label {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #a1a1aa;
+        }
+
+        .edit-form .form-group input,
+        .edit-form .form-group textarea {
+            background: #18181b;
+            border: 1px solid #27272a;
+            border-radius: 8px;
+            padding: 12px 14px;
+            font-size: 0.9375rem;
+            color: #e4e4e7;
+            transition: all 0.2s ease;
+            outline: none;
+        }
+
+        .edit-form .form-group input:focus,
+        .edit-form .form-group textarea:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .edit-form .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        /* Delete Confirmation */
+        .delete-preview {
+            display: flex;
+            gap: 16px;
+            align-items: flex-start;
+            padding: 16px;
+            background: rgba(239, 68, 68, 0.05);
+            border: 1px solid rgba(239, 68, 68, 0.1);
+            border-radius: 10px;
+            margin-bottom: 16px;
+        }
+
+        .delete-preview img {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 8px;
+            flex-shrink: 0;
+        }
+
+        .delete-preview-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .delete-preview-info h4 {
+            font-size: 0.9375rem;
+            font-weight: 600;
+            color: #e4e4e7;
+            margin-bottom: 4px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .delete-preview-info p {
+            font-size: 0.8125rem;
+            color: #71717a;
+        }
+
+        .delete-warning {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            color: #a1a1aa;
+            font-size: 0.9375rem;
+            line-height: 1.5;
+        }
+
+        .delete-warning svg {
+            width: 20px;
+            height: 20px;
+            stroke: #f59e0b;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 20px;
+            background: #111118;
+            border: 1px solid #27272a;
+            border-radius: 10px;
+            color: #e4e4e7;
+            font-weight: 500;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s ease;
+            z-index: 1100;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .toast svg {
+            width: 20px;
+            height: 20px;
+            flex-shrink: 0;
+        }
+
+        .toast.success {
+            border-color: rgba(0, 212, 170, 0.3);
+        }
+
+        .toast.success svg {
+            stroke: #00d4aa;
+        }
+
+        .toast.error {
+            border-color: rgba(239, 68, 68, 0.3);
+        }
+
+        .toast.error svg {
+            stroke: #ef4444;
+        }
+
+        .toast.info svg {
+            stroke: #3b82f6;
+        }
+
+        /* Loading Spinner */
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 60px 20px;
+            color: #a1a1aa;
+        }
+
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid #27272a;
+            border-top-color: #00d4aa;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 16px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Button Loading State */
+        .btn.loading {
+            pointer-events: none;
+            opacity: 0.7;
+        }
+
+        .btn.loading .btn-text {
+            opacity: 0;
+        }
+
+        .btn.loading::after {
+            content: '';
+            position: absolute;
+            width: 18px;
+            height: 18px;
+            border: 2px solid transparent;
+            border-top-color: currentColor;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        .btn {
+            position: relative;
+        }
+
+        /* Search Box */
+        .search-box {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex: 1;
+            max-width: 400px;
+        }
+
+        .search-input-wrapper {
+            position: relative;
+            flex: 1;
+        }
+
+        .search-input-wrapper svg {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 18px;
+            height: 18px;
+            stroke: #71717a;
+            pointer-events: none;
+        }
+
+        .search-input {
+            width: 100%;
+            background: #18181b;
+            border: 1px solid #27272a;
+            border-radius: 10px;
+            padding: 12px 14px 12px 44px;
+            font-size: 0.9375rem;
+            color: #e4e4e7;
+            transition: all 0.2s ease;
+            outline: none;
+        }
+
+        .search-input:focus {
+            border-color: #00d4aa;
+            box-shadow: 0 0 0 3px rgba(0, 212, 170, 0.1);
+        }
+
+        .search-input::placeholder {
+            color: #52525b;
+        }
+
+        .search-clear {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 24px;
+            height: 24px;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            background: #27272a;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            color: #71717a;
+            transition: all 0.2s ease;
+        }
+
+        .search-clear:hover {
+            background: #3f3f46;
+            color: #e4e4e7;
+        }
+
+        .search-clear svg {
+            position: static;
+            transform: none;
+            width: 14px;
+            height: 14px;
+            stroke: currentColor;
+        }
+
+        .search-input:not(:placeholder-shown) + .search-clear {
+            display: flex;
+        }
+
+        .search-results-info {
+            font-size: 0.875rem;
+            color: #71717a;
+            padding: 8px 0;
+        }
+
+        .search-results-info strong {
+            color: #00d4aa;
+        }
+
+        /* No Results State */
+        .no-results {
+            text-align: center;
+            padding: 60px 20px;
+            display: none;
+        }
+
+        .no-results svg {
+            width: 64px;
+            height: 64px;
+            stroke: #3f3f46;
+            margin-bottom: 20px;
+        }
+
+        .no-results h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #a1a1aa;
+            margin-bottom: 8px;
+        }
+
+        .no-results p {
+            color: #71717a;
+            font-size: 0.9375rem;
+        }
+
+        /* Highlight search match */
+        .gallery-item.hidden {
+            display: none;
+        }
+
+        .highlight {
+            background: rgba(0, 212, 170, 0.3);
+            color: #00d4aa;
+            padding: 0 2px;
+            border-radius: 2px;
+        }
+
+        /* Favorites Button */
+        .overlay-btn.favorite {
+            background: rgba(251, 191, 36, 0.2);
+            color: #fbbf24;
+        }
+
+        .overlay-btn.favorite:hover,
+        .overlay-btn.favorite.active {
+            background: #fbbf24;
+            color: #0a0a0f;
+        }
+
+        .overlay-btn.favorite.active svg {
+            fill: currentColor;
+        }
+
+        /* Filter Buttons */
+        .filter-tabs {
+            display: flex;
+            gap: 8px;
+            margin-left: auto;
+        }
+
+        .filter-tab {
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: 1px solid #27272a;
+            background: transparent;
+            color: #71717a;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .filter-tab:hover {
+            border-color: #3f3f46;
+            color: #a1a1aa;
+        }
+
+        .filter-tab.active {
+            background: #00d4aa;
+            border-color: #00d4aa;
+            color: #0a0a0f;
+        }
+
+        /* Slideshow Modal */
+        .slideshow-modal {
+            position: fixed;
+            inset: 0;
+            background: #000;
+            z-index: 2000;
+            display: none;
+            flex-direction: column;
+        }
+
+        .slideshow-modal.active {
+            display: flex;
+        }
+
+        .slideshow-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 24px;
+            background: rgba(0, 0, 0, 0.8);
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 10;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .slideshow-modal:hover .slideshow-header,
+        .slideshow-modal:hover .slideshow-controls {
+            opacity: 1;
+        }
+
+        .slideshow-title {
+            color: #fff;
+            font-size: 1rem;
+            font-weight: 500;
+        }
+
+        .slideshow-counter {
+            color: #a1a1aa;
+            font-size: 0.875rem;
+        }
+
+        .slideshow-close {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: #fff;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+
+        .slideshow-close:hover {
+            background: #ef4444;
+        }
+
+        .slideshow-close svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        .slideshow-content {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .slideshow-image {
+            max-width: 90%;
+            max-height: 85vh;
+            object-fit: contain;
+            border-radius: 8px;
+            transition: all 0.5s ease;
+        }
+
+        .slideshow-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: #fff;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            backdrop-filter: blur(8px);
+        }
+
+        .slideshow-nav:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-50%) scale(1.1);
+        }
+
+        .slideshow-nav svg {
+            width: 24px;
+            height: 24px;
+        }
+
+        .slideshow-prev {
+            left: 24px;
+        }
+
+        .slideshow-next {
+            right: 24px;
+        }
+
+        .slideshow-controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 16px;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .slideshow-btn {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: #fff;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+
+        .slideshow-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .slideshow-btn.active {
+            background: #00d4aa;
+            color: #0a0a0f;
+        }
+
+        .slideshow-btn svg {
+            width: 22px;
+            height: 22px;
+        }
+
+        /* Image Editor Modal */
+        .editor-modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 2000;
+            display: none;
+            flex-direction: column;
+        }
+
+        .editor-modal.active {
+            display: flex;
+        }
+
+        .editor-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 24px;
+            border-bottom: 1px solid #27272a;
+        }
+
+        .editor-title {
+            color: #fff;
+            font-size: 1.125rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .editor-title svg {
+            width: 22px;
+            height: 22px;
+            stroke: #a855f7;
+        }
+
+        .editor-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .editor-content {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+        }
+
+        .editor-preview {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            background: #0a0a0f;
+        }
+
+        .editor-image {
+            max-width: 100%;
+            max-height: 70vh;
+            object-fit: contain;
+            border-radius: 8px;
+            transition: filter 0.3s ease;
+        }
+
+        .editor-sidebar {
+            width: 320px;
+            background: #111118;
+            border-left: 1px solid #27272a;
+            padding: 24px;
+            overflow-y: auto;
+        }
+
+        .editor-section {
+            margin-bottom: 28px;
+        }
+
+        .editor-section-title {
+            font-size: 0.8125rem;
+            font-weight: 600;
+            color: #71717a;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 16px;
+        }
+
+        .editor-slider {
+            margin-bottom: 20px;
+        }
+
+        .editor-slider-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .editor-slider-label {
+            font-size: 0.9375rem;
+            color: #e4e4e7;
+            font-weight: 500;
+        }
+
+        .editor-slider-value {
+            font-size: 0.875rem;
+            color: #00d4aa;
+            font-weight: 600;
+            min-width: 48px;
+            text-align: right;
+        }
+
+        .editor-slider input[type="range"] {
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: #27272a;
+            appearance: none;
+            cursor: pointer;
+        }
+
+        .editor-slider input[type="range"]::-webkit-slider-thumb {
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #00d4aa;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        .editor-slider input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+
+        .filter-presets {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+
+        .filter-preset {
+            padding: 12px 8px;
+            border-radius: 10px;
+            border: 2px solid #27272a;
+            background: #18181b;
+            color: #a1a1aa;
+            font-size: 0.8125rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: center;
+        }
+
+        .filter-preset:hover {
+            border-color: #3f3f46;
+            color: #e4e4e7;
+        }
+
+        .filter-preset.active {
+            border-color: #00d4aa;
+            background: rgba(0, 212, 170, 0.1);
+            color: #00d4aa;
+        }
+
+        .editor-reset {
+            width: 100%;
+            padding: 12px;
+            border-radius: 10px;
+            border: 1px solid #27272a;
+            background: transparent;
+            color: #a1a1aa;
+            font-size: 0.9375rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .editor-reset:hover {
+            background: #27272a;
+            color: #e4e4e7;
+        }
+
+        .editor-reset svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        /* Start Slideshow Button */
+        .start-slideshow-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 18px;
+            border-radius: 10px;
+            border: 1px solid #27272a;
+            background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+            color: #fff;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .start-slideshow-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 20px rgba(99, 102, 241, 0.4);
+        }
+
+        .start-slideshow-btn svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        /* Edit Image Button on overlay */
+        .overlay-btn.edit-image {
+            background: rgba(168, 85, 247, 0.2);
+            color: #a855f7;
+        }
+
+        .overlay-btn.edit-image:hover {
+            background: #a855f7;
+            color: white;
+        }
+
+        /* Progress bar for slideshow */
+        .slideshow-progress {
+            position: absolute;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 8px;
+        }
+
+        .progress-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .progress-dot.active {
+            background: #00d4aa;
+            width: 24px;
+            border-radius: 4px;
+        }
+
+        .progress-dot:hover {
+            background: rgba(255, 255, 255, 0.5);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .stats {
+                flex-direction: column;
+                gap: 16px;
+            }
+
+            .search-box {
+                max-width: 100%;
+                width: 100%;
+            }
+
+            .filter-tabs {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .editor-content {
+                flex-direction: column;
+            }
+
+            .editor-sidebar {
+                width: 100%;
+                max-height: 40vh;
+            }
+
+            .slideshow-nav {
+                width: 44px;
+                height: 44px;
+            }
+
+            .slideshow-prev {
+                left: 12px;
+            }
+
+            .slideshow-next {
+                right: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+                    <circle cx="12" cy="13" r="4"/>
+                </svg>
+                Django Rasm Galereyasi
+            </h1>
+            <p>Rasmlarni yuklang, saqlang va boshqaring</p>
+        </header>
+
+        <!-- Upload Section -->
+        <div class="upload-section">
+            <form id="uploadForm" class="upload-form" enctype="multipart/form-data">
+                {% csrf_token %}
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="title">Sarlavha</label>
+                        <input type="text" id="title" name="title" placeholder="Rasm sarlavhasi...">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="description">Tavsif</label>
+                        <textarea id="description" name="description" placeholder="Rasm haqida..."></textarea>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="file-input-wrapper">
+                        <input type="file" id="imageFile" name="image" accept="image/*" required>
+                        <label for="imageFile" class="file-input-label">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                <polyline points="17 8 12 3 7 8"/>
+                                <line x1="12" y1="3" x2="12" y2="15"/>
+                            </svg>
+                            Rasm tanlash yoki bu yerga tashlang
+                        </label>
+                    </div>
+                    <div id="selectedFile" class="selected-file" style="display: none;"></div>
+                </div>
+
+                <button type="submit" class="btn btn-primary" id="uploadBtn">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                        <polyline points="17 8 12 3 7 8"/>
+                        <line x1="12" y1="3" x2="12" y2="15"/>
+                    </svg>
+                    <span class="btn-text">Yuklash</span>
+                </button>
+            </form>
+        </div>
+
+        <!-- Stats & Search -->
+        <div class="stats">
+            <div class="search-box">
+                <div class="search-input-wrapper">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8"/>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                    </svg>
+                    <input type="text" class="search-input" id="searchInput" placeholder="Rasm qidirish...">
+                    <button class="search-clear" id="searchClear" onclick="clearSearch()">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="18" y1="6" x2="6" y2="18"/>
+                            <line x1="6" y1="6" x2="18" y2="18"/>
+                        </svg>
+                    </button>
+                </div>
+                <span id="statsText">Jami: <strong>{{ photos.count }}</strong></span>
+            </div>
+            <div class="filter-tabs">
+                <button class="filter-tab active" onclick="filterPhotos('all')">Hammasi</button>
+                <button class="filter-tab" onclick="filterPhotos('favorites')">Sevimlilar</button>
+            </div>
+            <button class="start-slideshow-btn" onclick="startSlideshow()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polygon points="5 3 19 12 5 21 5 3"/>
+                </svg>
+                Slideshow
+            </button>
+            <button class="btn btn-danger" onclick="openDeleteAllModal()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="3 6 5 6 21 6"/>
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                </svg>
+                <span class="btn-text">O'chirish</span>
+            </button>
+        </div>
+
+        <!-- Gallery -->
+        <div id="gallery" class="gallery">
+            {% for photo in photos %}
+            <div class="gallery-item" data-id="{{ photo.id }}">
+                <div class="image-wrapper">
+                    <img src="{{ photo.image.url }}" alt="{{ photo.title|default:'Rasm' }}" loading="lazy">
+                    <div class="image-overlay">
+                        <button class="overlay-btn view" onclick="openViewModal('{{ photo.image.url }}')" title="Ko'rish">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                <circle cx="12" cy="12" r="3"/>
+                            </svg>
+                        </button>
+                        <button class="overlay-btn edit" onclick="openEditModal({{ photo.id }}, '{{ photo.title|escapejs }}', '{{ photo.description|escapejs }}', '{{ photo.image.url }}')" title="Tahrirlash">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                            </svg>
+                        </button>
+<button class="overlay-btn favorite" onclick="toggleFavorite({{ photo.id }}, this)" title="Sevimli">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                                            </svg>
+                                        </button>
+                                        <button class="overlay-btn edit-image" onclick="openImageEditor('{{ photo.image.url }}')" title="Filtr">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <circle cx="12" cy="12" r="3"/>
+                                                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                                            </svg>
+                                        </button>
+                                        <button class="overlay-btn download" onclick="downloadPhoto('{{ photo.image.url }}', '{{ photo.title|default:'rasm' }}')" title="Yuklab olish">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                                <polyline points="7 10 12 15 17 10"/>
+                                                <line x1="12" y1="15" x2="12" y2="3"/>
+                                            </svg>
+                                        </button>
+                                        <button class="overlay-btn delete" onclick="openDeleteModal({{ photo.id }}, '{{ photo.title|escapejs }}', '{{ photo.image.url }}')" title="O'chirish">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="3 6 5 6 21 6"/>
+                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                <div class="info">
+                    <h3>{{ photo.title|default:"Nomsiz rasm" }}</h3>
+                    <p>{{ photo.description|default:"Tavsif yo'q" }}</p>
+                </div>
+            </div>
+            {% empty %}
+            {% endfor %}
+        </div>
+
+        <!-- Empty State -->
+        {% if not photos %}
+        <div id="emptyState" class="empty-state">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                <circle cx="8.5" cy="8.5" r="1.5"/>
+                <polyline points="21 15 16 10 5 21"/>
+            </svg>
+            <h2>Hali rasm yo'q</h2>
+            <p>Yuqorida forma orqali birinchi rasmingizni yuklang!</p>
+        </div>
+        {% endif %}
+
+        <!-- No Search Results -->
+        <div id="noResults" class="no-results">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <circle cx="11" cy="11" r="8"/>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                <line x1="8" y1="11" x2="14" y2="11"/>
+            </svg>
+            <h3>Hech narsa topilmadi</h3>
+            <p id="noResultsText">Qidiruv so'zingizga mos rasm topilmadi</p>
+        </div>
+
+        <!-- Loading -->
+        <div id="loading" class="loading">
+            <div class="loading-spinner"></div>
+            <p>Yuklanmoqda...</p>
+        </div>
+    </div>
+
+    <!-- View Modal -->
+    <div class="modal-backdrop" id="viewModal">
+        <div class="view-modal-content">
+            <button class="modal-close" onclick="closeViewModal()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"/>
+                    <line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+            </button>
+            <img id="viewModalImg" src="" alt="Katta rasm">
+        </div>
+    </div>
+
+    <!-- Edit Modal -->
+    <div class="modal-backdrop" id="editModal">
+        <div class="dialog-modal">
+            <div class="dialog-header">
+                <h2 class="edit-title">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                    </svg>
+                    Rasmni tahrirlash
+                </h2>
+                <button class="dialog-close" onclick="closeEditModal()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"/>
+                        <line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="dialog-body">
+                <img id="editPreviewImg" class="edit-preview" src="" alt="Tahrirlash uchun rasm">
+                <form id="editForm" class="edit-form">
+                    <input type="hidden" id="editPhotoId" value="">
+                    <div class="form-group">
+                        <label for="editTitle">Sarlavha</label>
+                        <input type="text" id="editTitle" placeholder="Rasm sarlavhasi...">
+                    </div>
+                    <div class="form-group">
+                        <label for="editDescription">Tavsif</label>
+                        <textarea id="editDescription" placeholder="Rasm haqida..."></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="dialog-footer">
+                <button class="btn btn-secondary" onclick="closeEditModal()">
+                    <span class="btn-text">Bekor qilish</span>
+                </button>
+                <button class="btn btn-primary" id="saveEditBtn" onclick="saveEdit()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="20 6 9 17 4 12"/>
+                    </svg>
+                    <span class="btn-text">Saqlash</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Modal -->
+    <div class="modal-backdrop" id="deleteModal">
+        <div class="dialog-modal">
+            <div class="dialog-header">
+                <h2 class="delete-title">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="3 6 5 6 21 6"/>
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                    </svg>
+                    Rasmni o'chirish
+                </h2>
+                <button class="dialog-close" onclick="closeDeleteModal()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"/>
+                        <line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="dialog-body">
+                <div class="delete-preview">
+                    <img id="deletePreviewImg" src="" alt="O'chirilayotgan rasm">
+                    <div class="delete-preview-info">
+                        <h4 id="deletePhotoTitle">Rasm nomi</h4>
+                        <p>Bu rasm butunlay o'chiriladi</p>
+                    </div>
+                </div>
+                <input type="hidden" id="deletePhotoId" value="">
+                <div class="delete-warning">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                        <line x1="12" y1="9" x2="12" y2="13"/>
+                        <line x1="12" y1="17" x2="12.01" y2="17"/>
+                    </svg>
+                    <span>Bu amalni ortga qaytarib bo'lmaydi. Rasm serverdan butunlay o'chiriladi.</span>
+                </div>
+            </div>
+            <div class="dialog-footer">
+                <button class="btn btn-secondary" onclick="closeDeleteModal()">
+                    <span class="btn-text">Bekor qilish</span>
+                </button>
+                <button class="btn btn-danger" id="confirmDeleteBtn" onclick="confirmDelete()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="3 6 5 6 21 6"/>
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                    </svg>
+                    <span class="btn-text">O'chirish</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete All Modal -->
+    <div class="modal-backdrop" id="deleteAllModal">
+        <div class="dialog-modal">
+            <div class="dialog-header">
+                <h2 class="delete-title">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="3 6 5 6 21 6"/>
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                    </svg>
+                    Barcha rasmlarni o'chirish
+                </h2>
+                <button class="dialog-close" onclick="closeDeleteAllModal()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"/>
+                        <line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="dialog-body">
+                <div class="delete-warning">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                        <line x1="12" y1="9" x2="12" y2="13"/>
+                        <line x1="12" y1="17" x2="12.01" y2="17"/>
+                    </svg>
+                    <span>Barcha rasmlar serverdan butunlay o'chiriladi. Bu amalni ortga qaytarib bo'lmaydi!</span>
+                </div>
+            </div>
+            <div class="dialog-footer">
+                <button class="btn btn-secondary" onclick="closeDeleteAllModal()">
+                    <span class="btn-text">Bekor qilish</span>
+                </button>
+                <button class="btn btn-danger" id="confirmDeleteAllBtn" onclick="confirmDeleteAll()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="3 6 5 6 21 6"/>
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                    </svg>
+                    <span class="btn-text">Hammasini o'chirish</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slideshow Modal -->
+    <div class="slideshow-modal" id="slideshowModal">
+        <div class="slideshow-header">
+            <div>
+                <div class="slideshow-title" id="slideshowTitle">Rasm nomi</div>
+                <div class="slideshow-counter" id="slideshowCounter">1 / 10</div>
+            </div>
+            <button class="slideshow-close" onclick="closeSlideshow()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"/>
+                    <line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+            </button>
+        </div>
+        <div class="slideshow-content">
+            <button class="slideshow-nav slideshow-prev" onclick="prevSlide()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="15 18 9 12 15 6"/>
+                </svg>
+            </button>
+            <img class="slideshow-image" id="slideshowImage" src="" alt="Slideshow rasm">
+            <button class="slideshow-nav slideshow-next" onclick="nextSlide()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="9 18 15 12 9 6"/>
+                </svg>
+            </button>
+        </div>
+        <div class="slideshow-progress" id="slideshowProgress"></div>
+        <div class="slideshow-controls">
+            <button class="slideshow-btn" id="slideshowPrevBtn" onclick="prevSlide()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polygon points="19 20 9 12 19 4 19 20"/>
+                    <line x1="5" y1="19" x2="5" y2="5"/>
+                </svg>
+            </button>
+            <button class="slideshow-btn" id="slideshowPlayBtn" onclick="toggleAutoplay()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polygon points="5 3 19 12 5 21 5 3"/>
+                </svg>
+            </button>
+            <button class="slideshow-btn" id="slideshowNextBtn" onclick="nextSlide()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polygon points="5 4 15 12 5 20 5 4"/>
+                    <line x1="19" y1="5" x2="19" y2="19"/>
+                </svg>
+            </button>
+            <div style="width: 1px; height: 32px; background: #27272a; margin: 0 8px;"></div>
+            <button class="slideshow-btn" onclick="downloadCurrentSlide()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <polyline points="7 10 12 15 17 10"/>
+                    <line x1="12" y1="15" x2="12" y2="3"/>
+                </svg>
+            </button>
+            <button class="slideshow-btn" onclick="toggleFullscreen()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="15 3 21 3 21 9"/>
+                    <polyline points="9 21 3 21 3 15"/>
+                    <line x1="21" y1="3" x2="14" y2="10"/>
+                    <line x1="3" y1="21" x2="10" y2="14"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- Image Editor Modal -->
+    <div class="editor-modal" id="editorModal">
+        <div class="editor-header">
+            <div class="editor-title">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="3"/>
+                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                </svg>
+                Rasm tahrirlash
+            </div>
+            <div class="editor-actions">
+                <button class="btn btn-secondary" onclick="closeImageEditor()">
+                    <span class="btn-text">Bekor qilish</span>
+                </button>
+                <button class="btn btn-primary" onclick="downloadEditedImage()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                        <polyline points="7 10 12 15 17 10"/>
+                        <line x1="12" y1="15" x2="12" y2="3"/>
+                    </svg>
+                    <span class="btn-text">Yuklab olish</span>
+                </button>
+            </div>
+        </div>
+        <div class="editor-content">
+            <div class="editor-preview">
+                <img class="editor-image" id="editorImage" src="" alt="Tahrirlash">
+            </div>
+            <div class="editor-sidebar">
+                <div class="editor-section">
+                    <div class="editor-section-title">Sozlamalar</div>
+                    <div class="editor-slider">
+                        <div class="editor-slider-header">
+                            <span class="editor-slider-label">Yorqinlik</span>
+                            <span class="editor-slider-value" id="brightnessValue">100%</span>
+                        </div>
+                        <input type="range" id="brightness" min="0" max="200" value="100" oninput="updateFilter()">
+                    </div>
+                    <div class="editor-slider">
+                        <div class="editor-slider-header">
+                            <span class="editor-slider-label">Kontrast</span>
+                            <span class="editor-slider-value" id="contrastValue">100%</span>
+                        </div>
+                        <input type="range" id="contrast" min="0" max="200" value="100" oninput="updateFilter()">
+                    </div>
+                    <div class="editor-slider">
+                        <div class="editor-slider-header">
+                            <span class="editor-slider-label">To'yinganlik</span>
+                            <span class="editor-slider-value" id="saturationValue">100%</span>
+                        </div>
+                        <input type="range" id="saturation" min="0" max="200" value="100" oninput="updateFilter()">
+                    </div>
+                    <div class="editor-slider">
+                        <div class="editor-slider-header">
+                            <span class="editor-slider-label">Blur</span>
+                            <span class="editor-slider-value" id="blurValue">0px</span>
+                        </div>
+                        <input type="range" id="blur" min="0" max="20" value="0" oninput="updateFilter()">
+                    </div>
+                </div>
+                <div class="editor-section">
+                    <div class="editor-section-title">Filtrlar</div>
+                    <div class="filter-presets">
+                        <button class="filter-preset active" onclick="applyPreset('none')">Normal</button>
+                        <button class="filter-preset" onclick="applyPreset('grayscale')">Oq-qora</button>
+                        <button class="filter-preset" onclick="applyPreset('sepia')">Sepia</button>
+                        <button class="filter-preset" onclick="applyPreset('vintage')">Vintage</button>
+                        <button class="filter-preset" onclick="applyPreset('warm')">Iliq</button>
+                        <button class="filter-preset" onclick="applyPreset('cool')">Sovuq</button>
+                        <button class="filter-preset" onclick="applyPreset('dramatic')">Dramatik</button>
+                        <button class="filter-preset" onclick="applyPreset('invert')">Invert</button>
+                        <button class="filter-preset" onclick="applyPreset('bright')">Yorqin</button>
+                    </div>
+                </div>
+                <button class="editor-reset" onclick="resetFilters()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+                        <path d="M3 3v5h5"/>
+                    </svg>
+                    Qayta tiklash
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast" id="toast">
+        <svg id="toastIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="20 6 9 17 4 12"/>
+        </svg>
+        <span id="toastMessage"></span>
+    </div>
+
+    <script>
+        // CSRF Token
+        function getCSRFToken() {
+            return document.querySelector('[name=csrfmiddlewaretoken]').value;
+        }
+
+        // Search functionality
+        let allPhotos = [];
+        const searchInput = document.getElementById('searchInput');
+        const searchClear = document.getElementById('searchClear');
+        const noResults = document.getElementById('noResults');
+        const noResultsText = document.getElementById('noResultsText');
+
+        // Initialize photos data
+        document.querySelectorAll('.gallery-item').forEach(item => {
+            allPhotos.push({
+                id: item.dataset.id,
+                element: item,
+                title: item.querySelector('.info h3').textContent.toLowerCase(),
+                description: item.querySelector('.info p').textContent.toLowerCase()
+            });
+        });
+
+        // Search function
+        function searchPhotos(query) {
+            const searchTerm = query.toLowerCase().trim();
+            let visibleCount = 0;
+            const gallery = document.getElementById('gallery');
+            const emptyState = document.getElementById('emptyState');
+
+            if (!searchTerm) {
+                // Show all photos
+                allPhotos.forEach(photo => {
+                    photo.element.classList.remove('hidden');
+                    // Remove highlights
+                    const titleEl = photo.element.querySelector('.info h3');
+                    const descEl = photo.element.querySelector('.info p');
+                    titleEl.innerHTML = titleEl.textContent;
+                    descEl.innerHTML = descEl.textContent;
+                });
+                noResults.style.display = 'none';
+                if (emptyState) emptyState.style.display = allPhotos.length === 0 ? 'block' : 'none';
+                updateStats();
+                return;
+            }
+
+            allPhotos.forEach(photo => {
+                const titleMatch = photo.title.includes(searchTerm);
+                const descMatch = photo.description.includes(searchTerm);
+
+                if (titleMatch || descMatch) {
+                    photo.element.classList.remove('hidden');
+                    visibleCount++;
+
+                    // Highlight matches
+                    const titleEl = photo.element.querySelector('.info h3');
+                    const descEl = photo.element.querySelector('.info p');
+
+                    if (titleMatch) {
+                        titleEl.innerHTML = highlightText(titleEl.textContent, searchTerm);
+                    } else {
+                        titleEl.innerHTML = titleEl.textContent;
+                    }
+
+                    if (descMatch) {
+                        descEl.innerHTML = highlightText(descEl.textContent, searchTerm);
+                    } else {
+                        descEl.innerHTML = descEl.textContent;
+                    }
+                } else {
+                    photo.element.classList.add('hidden');
+                    // Remove highlights
+                    const titleEl = photo.element.querySelector('.info h3');
+                    const descEl = photo.element.querySelector('.info p');
+                    titleEl.innerHTML = titleEl.textContent;
+                    descEl.innerHTML = descEl.textContent;
+                }
+            });
+
+            // Show/hide no results message
+            if (visibleCount === 0 && allPhotos.length > 0) {
+                noResults.style.display = 'block';
+                noResultsText.textContent = `"${query}" so'ziga mos rasm topilmadi`;
+            } else {
+                noResults.style.display = 'none';
+            }
+
+            // Hide empty state during search
+            if (emptyState) emptyState.style.display = 'none';
+
+            // Update stats with search results
+            document.getElementById('statsText').innerHTML = `Topildi: <strong>${visibleCount}</strong> / ${allPhotos.length}`;
+        }
+
+        // Highlight matching text
+        function highlightText(text, term) {
+            const regex = new RegExp(`(${escapeRegex(term)})`, 'gi');
+            return text.replace(regex, '<span class="highlight">$1</span>');
+        }
+
+        // Escape special regex characters
+        function escapeRegex(string) {
+            return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        }
+
+        // Clear search
+        function clearSearch() {
+            searchInput.value = '';
+            searchPhotos('');
+            searchInput.focus();
+        }
+
+        // Debounce function for better performance
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+
+        // Search input event
+        const debouncedSearch = debounce((e) => searchPhotos(e.target.value), 200);
+        searchInput.addEventListener('input', debouncedSearch);
+
+        // Clear button visibility
+        searchInput.addEventListener('input', function() {
+            searchClear.style.display = this.value ? 'flex' : 'none';
+        });
+
+        // File input preview
+        document.getElementById('imageFile').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            const selectedFileDiv = document.getElementById('selectedFile');
+
+            if (file) {
+                selectedFileDiv.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> ' + file.name;
+                selectedFileDiv.style.display = 'flex';
+            } else {
+                selectedFileDiv.style.display = 'none';
+            }
+        });
+
+        // Toast notification
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toastMessage');
+            const toastIcon = document.getElementById('toastIcon');
+
+            toastMessage.textContent = message;
+            toast.className = 'toast ' + type;
+
+            // Update icon based on type
+            if (type === 'success') {
+                toastIcon.innerHTML = '<polyline points="20 6 9 17 4 12"/>';
+            } else if (type === 'error') {
+                toastIcon.innerHTML = '<circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>';
+            } else {
+                toastIcon.innerHTML = '<circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>';
+            }
+
+            toast.classList.add('show');
+
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // View Modal
+        function openViewModal(imageSrc) {
+            const modal = document.getElementById('viewModal');
+            const modalImg = document.getElementById('viewModalImg');
+            modalImg.src = imageSrc;
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeViewModal() {
+            const modal = document.getElementById('viewModal');
+            modal.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        // Edit Modal
+        function openEditModal(id, title, description, imageSrc) {
+            document.getElementById('editPhotoId').value = id;
+            document.getElementById('editTitle').value = title || '';
+            document.getElementById('editDescription').value = description || '';
+            document.getElementById('editPreviewImg').src = imageSrc;
+            document.getElementById('editModal').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeEditModal() {
+            document.getElementById('editModal').classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        function saveEdit() {
+            const id = document.getElementById('editPhotoId').value;
+            const title = document.getElementById('editTitle').value;
+            const description = document.getElementById('editDescription').value;
+            const btn = document.getElementById('saveEditBtn');
+
+            btn.classList.add('loading');
+
+            fetch(`/api/photos/${id}/`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCSRFToken()
+                },
+                body: JSON.stringify({ title, description })
+            })
+            .then(response => {
+                if (!response.ok) throw new Error('Xatolik yuz berdi');
+                return response.json();
+            })
+            .then(data => {
+                // Update DOM
+                const item = document.querySelector(`.gallery-item[data-id="${id}"]`);
+                if (item) {
+                    item.querySelector('.info h3').textContent = title || 'Nomsiz rasm';
+                    item.querySelector('.info p').textContent = description || "Tavsif yo'q";
+                }
+                closeEditModal();
+                showToast('Rasm muvaffaqiyatli yangilandi', 'success');
+            })
+            .catch(error => {
+                showToast('Xatolik: ' + error.message, 'error');
+            })
+            .finally(() => {
+                btn.classList.remove('loading');
+            });
+        }
+
+        // Delete Modal
+        function openDeleteModal(id, title, imageSrc) {
+            document.getElementById('deletePhotoId').value = id;
+            document.getElementById('deletePhotoTitle').textContent = title || 'Nomsiz rasm';
+            document.getElementById('deletePreviewImg').src = imageSrc;
+            document.getElementById('deleteModal').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeDeleteModal() {
+            document.getElementById('deleteModal').classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        function confirmDelete() {
+            const id = document.getElementById('deletePhotoId').value;
+            const btn = document.getElementById('confirmDeleteBtn');
+
+            btn.classList.add('loading');
+
+            fetch(`/api/photos/${id}/`, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRFToken': getCSRFToken()
+                }
+            })
+            .then(response => {
+                if (!response.ok) throw new Error('Xatolik yuz berdi');
+
+                // Remove from DOM
+                const item = document.querySelector(`.gallery-item[data-id="${id}"]`);
+                if (item) {
+                    item.style.transition = 'all 0.3s ease';
+                    item.style.opacity = '0';
+                    item.style.transform = 'scale(0.9)';
+                    setTimeout(() => item.remove(), 300);
+                }
+
+                // Remove from allPhotos array
+                allPhotos = allPhotos.filter(p => p.id !== id);
+
+                // Update stats
+                updateStats();
+
+                closeDeleteModal();
+                showToast("Rasm muvaffaqiyatli o'chirildi", 'success');
+            })
+            .catch(error => {
+                showToast('Xatolik: ' + error.message, 'error');
+            })
+            .finally(() => {
+                btn.classList.remove('loading');
+            });
+        }
+
+        // Delete All Modal
+        function openDeleteAllModal() {
+            document.getElementById('deleteAllModal').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeDeleteAllModal() {
+            document.getElementById('deleteAllModal').classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        function confirmDeleteAll() {
+            const btn = document.getElementById('confirmDeleteAllBtn');
+
+            btn.classList.add('loading');
+
+            fetch('/api/photos/delete-all/', {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRFToken': getCSRFToken()
+                }
+            })
+            .then(response => {
+                if (!response.ok) throw new Error('Xatolik yuz berdi');
+
+                // Clear gallery
+                document.getElementById('gallery').innerHTML = '';
+
+                // Clear allPhotos array
+                allPhotos = [];
+
+                // Clear search input
+                searchInput.value = '';
+                searchClear.style.display = 'none';
+                noResults.style.display = 'none';
+
+                // Show empty state
+                const emptyState = document.createElement('div');
+                emptyState.id = 'emptyState';
+                emptyState.className = 'empty-state';
+                emptyState.innerHTML = `
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                        <circle cx="8.5" cy="8.5" r="1.5"/>
+                        <polyline points="21 15 16 10 5 21"/>
+                    </svg>
+                    <h2>Hali rasm yo'q</h2>
+                    <p>Yuqorida forma orqali birinchi rasmingizni yuklang!</p>
+                `;
+                document.getElementById('gallery').after(emptyState);
+
+                // Update stats
+                document.getElementById('statsText').innerHTML = 'Jami rasmlar: <strong>0</strong>';
+
+                closeDeleteAllModal();
+                showToast("Barcha rasmlar o'chirildi", 'success');
+            })
+            .catch(error => {
+                showToast('Xatolik: ' + error.message, 'error');
+            })
+            .finally(() => {
+                btn.classList.remove('loading');
+            });
+        }
+
+        // Download photo
+        function downloadPhoto(url, filename) {
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = filename + '.jpg';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            showToast('Rasm yuklab olindi', 'success');
+        }
+
+        // Update stats
+        function updateStats() {
+            const count = document.querySelectorAll('.gallery-item').length;
+            document.getElementById('statsText').innerHTML = `Jami rasmlar: <strong>${count}</strong>`;
+        }
+
+        // Close modals on backdrop click
+        document.querySelectorAll('.modal-backdrop').forEach(modal => {
+            modal.addEventListener('click', function(e) {
+                if (e.target === this) {
+                    this.classList.remove('active');
+                    document.body.style.overflow = '';
+                }
+            });
+        });
+
+        // Close modals on Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                document.querySelectorAll('.modal-backdrop.active').forEach(modal => {
+                    modal.classList.remove('active');
+                });
+                document.body.style.overflow = '';
+            }
+        });
+
+        // Form submit
+        document.getElementById('uploadForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const formData = new FormData(this);
+            const btn = document.getElementById('uploadBtn');
+
+            btn.classList.add('loading');
+
+            fetch('/api/photos/', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCSRFToken()
+                },
+                body: formData
+            })
+            .then(response => {
+                if (!response.ok) throw new Error('Xatolik yuz berdi');
+                return response.json();
+            })
+            .then(photo => {
+                // Remove empty state if exists
+                const emptyState = document.getElementById('emptyState');
+                if (emptyState) emptyState.remove();
+
+                // Add new photo to gallery
+                const gallery = document.getElementById('gallery');
+                const newItem = document.createElement('div');
+                newItem.className = 'gallery-item';
+                newItem.dataset.id = photo.id;
+                newItem.innerHTML = `
+                    <div class="image-wrapper">
+                        <img src="${photo.image}" alt="${photo.title || 'Rasm'}" loading="lazy">
+                        <div class="image-overlay">
+                            <button class="overlay-btn view" onclick="openViewModal('${photo.image}')" title="Ko'rish">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                    <circle cx="12" cy="12" r="3"/>
+                                </svg>
+                            </button>
+                            <button class="overlay-btn edit" onclick="openEditModal(${photo.id}, '${(photo.title || '').replace(/'/g, "\\'")}', '${(photo.description || '').replace(/'/g, "\\'")}', '${photo.image}')" title="Tahrirlash">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                                </svg>
+                            </button>
+                            <button class="overlay-btn favorite" onclick="toggleFavorite(${photo.id}, this)" title="Sevimli">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                                </svg>
+                            </button>
+                            <button class="overlay-btn edit-image" onclick="openImageEditor('${photo.image}')" title="Filtr">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="3"/>
+                                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                                </svg>
+                            </button>
+                            <button class="overlay-btn download" onclick="downloadPhoto('${photo.image}', '${photo.title || 'rasm'}')" title="Yuklab olish">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                    <polyline points="7 10 12 15 17 10"/>
+                                    <line x1="12" y1="15" x2="12" y2="3"/>
+                                </svg>
+                            </button>
+                            <button class="overlay-btn delete" onclick="openDeleteModal(${photo.id}, '${(photo.title || '').replace(/'/g, "\\'")}', '${photo.image}')" title="O'chirish">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="3 6 5 6 21 6"/>
+                                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="info">
+                        <h3>${photo.title || 'Nomsiz rasm'}</h3>
+                        <p>${photo.description || "Tavsif yo'q"}</p>
+                    </div>
+                `;
+                gallery.prepend(newItem);
+
+                // Add to allPhotos array for search
+                allPhotos.unshift({
+                    id: photo.id.toString(),
+                    element: newItem,
+                    title: (photo.title || 'nomsiz rasm').toLowerCase(),
+                    description: (photo.description || "tavsif yo'q").toLowerCase()
+                });
+
+                // Reset form
+                this.reset();
+                document.getElementById('selectedFile').style.display = 'none';
+
+                // Update stats
+                updateStats();
+
+                showToast('Rasm muvaffaqiyatli yuklandi', 'success');
+            })
+            .catch(error => {
+                showToast('Xatolik: ' + error.message, 'error');
+            })
+            .finally(() => {
+                btn.classList.remove('loading');
+            });
+        });
+
+        // ============ FAVORITES ============
+        let favorites = JSON.parse(localStorage.getItem('photoFavorites') || '[]');
+
+        function toggleFavorite(id, btn) {
+            const index = favorites.indexOf(id);
+            if (index > -1) {
+                favorites.splice(index, 1);
+                btn.classList.remove('active');
+                showToast("Sevimlilardan olib tashlandi", 'info');
+            } else {
+                favorites.push(id);
+                btn.classList.add('active');
+                showToast("Sevimlilarga qo'shildi", 'success');
+            }
+            localStorage.setItem('photoFavorites', JSON.stringify(favorites));
+
+            // Update visibility if favorites filter is active
+            const activeTab = document.querySelector('.filter-tab.active');
+            if (activeTab && activeTab.textContent === 'Sevimlilar') {
+                filterPhotos('favorites');
+            }
+        }
+
+        // Initialize favorites on page load
+        document.querySelectorAll('.gallery-item').forEach(item => {
+            const id = parseInt(item.dataset.id);
+            if (favorites.includes(id)) {
+                const btn = item.querySelector('.overlay-btn.favorite');
+                if (btn) btn.classList.add('active');
+            }
+        });
+
+        function filterPhotos(type) {
+            document.querySelectorAll('.filter-tab').forEach(tab => tab.classList.remove('active'));
+            event.target.classList.add('active');
+
+            const items = document.querySelectorAll('.gallery-item');
+            let visibleCount = 0;
+
+            items.forEach(item => {
+                const id = parseInt(item.dataset.id);
+                if (type === 'all') {
+                    item.classList.remove('hidden');
+                    visibleCount++;
+                } else if (type === 'favorites') {
+                    if (favorites.includes(id)) {
+                        item.classList.remove('hidden');
+                        visibleCount++;
+                    } else {
+                        item.classList.add('hidden');
+                    }
+                }
+            });
+
+            // Show no results if no favorites
+            if (type === 'favorites' && visibleCount === 0) {
+                noResults.style.display = 'block';
+                noResultsText.textContent = "Hali sevimli rasmlar yo'q";
+            } else {
+                noResults.style.display = 'none';
+            }
+
+            document.getElementById('statsText').innerHTML = `Ko'rsatilgan: <strong>${visibleCount}</strong>`;
+        }
+
+        // ============ SLIDESHOW ============
+        let slideshowIndex = 0;
+        let slideshowPhotos = [];
+        let autoplayInterval = null;
+        let isAutoplay = false;
+
+        function startSlideshow() {
+            slideshowPhotos = [];
+            document.querySelectorAll('.gallery-item:not(.hidden)').forEach(item => {
+                const img = item.querySelector('img');
+                const title = item.querySelector('.info h3').textContent;
+                slideshowPhotos.push({
+                    src: img.src,
+                    title: title
+                });
+            });
+
+            if (slideshowPhotos.length === 0) {
+                showToast("Ko'rsatish uchun rasm yo'q", 'error');
+                return;
+            }
+
+            slideshowIndex = 0;
+            updateSlideshow();
+            createProgressDots();
+            document.getElementById('slideshowModal').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeSlideshow() {
+            document.getElementById('slideshowModal').classList.remove('active');
+            document.body.style.overflow = '';
+            stopAutoplay();
+        }
+
+        function updateSlideshow() {
+            const photo = slideshowPhotos[slideshowIndex];
+            document.getElementById('slideshowImage').src = photo.src;
+            document.getElementById('slideshowTitle').textContent = photo.title;
+            document.getElementById('slideshowCounter').textContent = `${slideshowIndex + 1} / ${slideshowPhotos.length}`;
+
+            // Update progress dots
+            document.querySelectorAll('.progress-dot').forEach((dot, i) => {
+                dot.classList.toggle('active', i === slideshowIndex);
+            });
+        }
+
+        function createProgressDots() {
+            const container = document.getElementById('slideshowProgress');
+            container.innerHTML = '';
+            slideshowPhotos.forEach((_, i) => {
+                const dot = document.createElement('div');
+                dot.className = 'progress-dot' + (i === 0 ? ' active' : '');
+                dot.onclick = () => goToSlide(i);
+                container.appendChild(dot);
+            });
+        }
+
+        function goToSlide(index) {
+            slideshowIndex = index;
+            updateSlideshow();
+        }
+
+        function nextSlide() {
+            slideshowIndex = (slideshowIndex + 1) % slideshowPhotos.length;
+            updateSlideshow();
+        }
+
+        function prevSlide() {
+            slideshowIndex = (slideshowIndex - 1 + slideshowPhotos.length) % slideshowPhotos.length;
+            updateSlideshow();
+        }
+
+        function toggleAutoplay() {
+            const btn = document.getElementById('slideshowPlayBtn');
+            if (isAutoplay) {
+                stopAutoplay();
+                btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>';
+                btn.classList.remove('active');
+            } else {
+                startAutoplay();
+                btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>';
+                btn.classList.add('active');
+            }
+        }
+
+        function startAutoplay() {
+            isAutoplay = true;
+            autoplayInterval = setInterval(nextSlide, 3000);
+        }
+
+        function stopAutoplay() {
+            isAutoplay = false;
+            if (autoplayInterval) {
+                clearInterval(autoplayInterval);
+                autoplayInterval = null;
+            }
+        }
+
+        function downloadCurrentSlide() {
+            const photo = slideshowPhotos[slideshowIndex];
+            downloadPhoto(photo.src, photo.title);
+        }
+
+        function toggleFullscreen() {
+            const modal = document.getElementById('slideshowModal');
+            if (!document.fullscreenElement) {
+                modal.requestFullscreen().catch(err => {
+                    showToast("Fullscreen rejimga o'tib bo'lmadi", 'error');
+                });
+            } else {
+                document.exitFullscreen();
+            }
+        }
+
+        // Keyboard navigation for slideshow
+        document.addEventListener('keydown', function(e) {
+            if (document.getElementById('slideshowModal').classList.contains('active')) {
+                if (e.key === 'ArrowRight') nextSlide();
+                if (e.key === 'ArrowLeft') prevSlide();
+                if (e.key === ' ') { e.preventDefault(); toggleAutoplay(); }
+                if (e.key === 'f') toggleFullscreen();
+            }
+        });
+
+        // ============ IMAGE EDITOR ============
+        let editorFilters = {
+            brightness: 100,
+            contrast: 100,
+            saturation: 100,
+            blur: 0,
+            grayscale: 0,
+            sepia: 0,
+            invert: 0,
+            hueRotate: 0
+        };
+
+        function openImageEditor(imageSrc) {
+            document.getElementById('editorImage').src = imageSrc;
+            resetFilters();
+            document.getElementById('editorModal').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeImageEditor() {
+            document.getElementById('editorModal').classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        function updateFilter() {
+            editorFilters.brightness = document.getElementById('brightness').value;
+            editorFilters.contrast = document.getElementById('contrast').value;
+            editorFilters.saturation = document.getElementById('saturation').value;
+            editorFilters.blur = document.getElementById('blur').value;
+
+            document.getElementById('brightnessValue').textContent = editorFilters.brightness + '%';
+            document.getElementById('contrastValue').textContent = editorFilters.contrast + '%';
+            document.getElementById('saturationValue').textContent = editorFilters.saturation + '%';
+            document.getElementById('blurValue').textContent = editorFilters.blur + 'px';
+
+            applyFilters();
+        }
+
+        function applyFilters() {
+            const img = document.getElementById('editorImage');
+            img.style.filter = `
+                brightness(${editorFilters.brightness}%)
+                contrast(${editorFilters.contrast}%)
+                saturate(${editorFilters.saturation}%)
+                blur(${editorFilters.blur}px)
+                grayscale(${editorFilters.grayscale}%)
+                sepia(${editorFilters.sepia}%)
+                invert(${editorFilters.invert}%)
+                hue-rotate(${editorFilters.hueRotate}deg)
+            `;
+        }
+
+        function applyPreset(preset) {
+            document.querySelectorAll('.filter-preset').forEach(p => p.classList.remove('active'));
+            event.target.classList.add('active');
+
+            // Reset all
+            editorFilters = {
+                brightness: 100,
+                contrast: 100,
+                saturation: 100,
+                blur: 0,
+                grayscale: 0,
+                sepia: 0,
+                invert: 0,
+                hueRotate: 0
+            };
+
+            switch(preset) {
+                case 'grayscale':
+                    editorFilters.grayscale = 100;
+                    break;
+                case 'sepia':
+                    editorFilters.sepia = 100;
+                    break;
+                case 'vintage':
+                    editorFilters.sepia = 40;
+                    editorFilters.contrast = 90;
+                    editorFilters.brightness = 110;
+                    break;
+                case 'warm':
+                    editorFilters.sepia = 30;
+                    editorFilters.saturation = 120;
+                    break;
+                case 'cool':
+                    editorFilters.hueRotate = 180;
+                    editorFilters.saturation = 80;
+                    break;
+                case 'dramatic':
+                    editorFilters.contrast = 150;
+                    editorFilters.brightness = 90;
+                    editorFilters.saturation = 120;
+                    break;
+                case 'invert':
+                    editorFilters.invert = 100;
+                    break;
+                case 'bright':
+                    editorFilters.brightness = 130;
+                    editorFilters.saturation = 110;
+                    break;
+            }
+
+            updateSliders();
+            applyFilters();
+        }
+
+        function updateSliders() {
+            document.getElementById('brightness').value = editorFilters.brightness;
+            document.getElementById('contrast').value = editorFilters.contrast;
+            document.getElementById('saturation').value = editorFilters.saturation;
+            document.getElementById('blur').value = editorFilters.blur;
+
+            document.getElementById('brightnessValue').textContent = editorFilters.brightness + '%';
+            document.getElementById('contrastValue').textContent = editorFilters.contrast + '%';
+            document.getElementById('saturationValue').textContent = editorFilters.saturation + '%';
+            document.getElementById('blurValue').textContent = editorFilters.blur + 'px';
+        }
+
+        function resetFilters() {
+            editorFilters = {
+                brightness: 100,
+                contrast: 100,
+                saturation: 100,
+                blur: 0,
+                grayscale: 0,
+                sepia: 0,
+                invert: 0,
+                hueRotate: 0
+            };
+
+            updateSliders();
+            applyFilters();
+
+            document.querySelectorAll('.filter-preset').forEach(p => p.classList.remove('active'));
+            document.querySelector('.filter-preset').classList.add('active');
+        }
+
+        function downloadEditedImage() {
+            const img = document.getElementById('editorImage');
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+
+            const image = new Image();
+            image.crossOrigin = 'anonymous';
+            image.onload = function() {
+                canvas.width = image.width;
+                canvas.height = image.height;
+
+                ctx.filter = `
+                    brightness(${editorFilters.brightness}%)
+                    contrast(${editorFilters.contrast}%)
+                    saturate(${editorFilters.saturation}%)
+                    blur(${editorFilters.blur}px)
+                    grayscale(${editorFilters.grayscale}%)
+                    sepia(${editorFilters.sepia}%)
+                    invert(${editorFilters.invert}%)
+                    hue-rotate(${editorFilters.hueRotate}deg)
+                `;
+
+                ctx.drawImage(image, 0, 0);
+
+                const link = document.createElement('a');
+                link.download = 'tahrirlangan-rasm.jpg';
+                link.href = canvas.toDataURL('image/jpeg', 0.9);
+                link.click();
+
+                showToast('Tahrirlangan rasm yuklandi', 'success');
+            };
+            image.src = img.src;
+        }
+    </script>
+</body>
+</html>
