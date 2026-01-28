@@ -9,8 +9,10 @@ venv/
 env/
 ENV/
 
-# Python
+*.pyc
 __pycache__/
+
+# Python
 *.py[cod]
 *$py.class
 *.so
